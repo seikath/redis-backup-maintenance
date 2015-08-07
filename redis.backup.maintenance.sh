@@ -1,10 +1,11 @@
 #!/bin/bash
-## Fri, 07 Aug 2015 12:12:57 +0300
+## Fri, 07 Aug 2015 14:04:57 +0300
 ## redis backup every 15 minutes 
-##*/15 * * * * /opt/bin/redis.backup.sh >> /var/log/redis.backup.log 2>&1
-## cat /etc/rc.local | grep redis : 
+## */15 * * * * redis.backup.maintenance.sh >> /var/log/redis.backup.log 2>&1
+## at /etc/rc.local : 
 ## test -d /var/run/redis.backup.lock.dir && rm -rf /var/run/redis.backup.lock.dir
-## 
+## watch the job:
+## tail -f /var/log/redis.backup.log
 
 #redis-cli LASTSAVE | awk '{print $1}' | { read gmt ; date "+%Y-%m-%d %H:%M:%S" -d "@$gmt" ; } 
 # 2015-08-07 01:25:54
@@ -23,7 +24,6 @@ fi
 
 echo "$(date +%Y-%m-%d.%H.%M.%S) : redis backup start"
 echo "$(date +%Y-%m-%d.%H.%M.%S) : cleanup the /redis_backups and leave the last 6 backups"
-#find /redis_backups -maxdepth 1 -type f -name "dump.rdb.*" | sort -r | sed '6,$!d' | while read to_be_deleted; do rm -fvv {$to_be_deleted};done 
 find /redis_backups -maxdepth 1 -type f -name "dump.rdb.*" | sort -r | sed '7,$!d' | while read to_be_deleted; do rm -f ${to_be_deleted} && echo "$(date +%Y-%m-%d.%H.%M.%S) : deleted ${to_be_deleted}";done
 
 last_save=$(redis-cli LASTSAVE | awk '{print $1}')
